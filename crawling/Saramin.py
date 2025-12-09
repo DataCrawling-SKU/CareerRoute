@@ -1,8 +1,24 @@
 from bs4 import BeautifulSoup
 import requests
 import csv
+import time
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 
 backendResult = [] # 데이터 행 저장
+
+# 셀레니움 브라우저 설정
+options = Options()
+options.add_argument("--headless")   # 브라우저 안 띄움 (필요하면 주석 처리)
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("window-size=1920x1080")
+options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36")
+
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 page = 1 # 1페이지부터 크롤링
 

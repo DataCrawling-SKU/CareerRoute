@@ -26,8 +26,6 @@ page = 1 # 1페이지부터 크롤링
 while True: # 페이지 당 100개씩 29 페이지까지 있음
   print(f"{page} 페이지 접속 중")
 
-  #url = f"https://www.saramin.co.kr/zf_user/search/recruit?ajax=y&searchType=search&searchword=백엔드&recruitPage={page}&recruitSort=relation"
-
   soup = BeautifulSoup(driver.page_source, "html.parser")
   print(f"{page} 페이지 크롤링 중")
 

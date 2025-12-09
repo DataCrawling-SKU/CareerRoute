@@ -54,10 +54,10 @@ while True: # 페이지 당 100개씩 29 페이지까지 있음
       date = ""
 
     # 시계열 형태로 csv에 카테고리 당 한 행으로 저장
-    for c in categories:
+    for category in categories:
       backendResult.append({
         "company" : company,
-        "category" : c,
+        "category" : category,
         "date" : date   
       })
   # 다음 페이지로 이동

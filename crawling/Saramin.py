@@ -1,60 +1,45 @@
 from bs4 import BeautifulSoup
-import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import csv
 import time
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
-
 backendResult = [] # 데이터 행 저장
 
-# 셀레니움 브라우저 설정
+# 셀레니움 옵션
 options = Options()
-options.add_argument("--headless")   # 브라우저 안 띄움 (필요하면 주석 처리)
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
 options.add_argument("window-size=1920x1080")
 options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36")
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
+# 첫 페이지 열기
+base_url = "https://www.saramin.co.kr/zf_user/search/recruit?search_area=main&search_done=y&search_optional_item=n&searchType=search&searchword=백엔드"
+driver.get(base_url)
+time.sleep(2)
+
 page = 1 # 1페이지부터 크롤링
 
-# 외부 페이지 크롤링 시 봇 차단 문제 해결
-headers = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-}
-
 while True: # 페이지 당 100개씩 29 페이지까지 있음
-  # URL 문자열을 문자열 포멧대신 request param으로 관리(가독성, 버그 낮춤)
-  params = {
-        "search_area": "main",
-        "search_done": "y",
-        "search_optional_item": "n",
-        "searchType": "search",
-        "searchword": "백엔드",
-        "recruitPage": page,
-        "recruitSort": "relation",
-        "recruitPageCount": 100
-    }
+  print(f"{page} 페이지 접속 중")
 
-  base = "https://www.saramin.co.kr/zf_user/search/recruit"
-  response = requests.get(base, params=params)
-  soup = BeautifulSoup(response.text, "html.parser")
+  #url = f"https://www.saramin.co.kr/zf_user/search/recruit?ajax=y&searchType=search&searchword=백엔드&recruitPage={page}&recruitSort=relation"
 
-  print(response.text[:3000])
+  soup = BeautifulSoup(driver.page_source, "html.parser")
   print(f"{page} 페이지 크롤링 중")
 
   items = soup.select("div.item_recruit")
+
   if not items: # item_recruit 태그의 데이터가 더이상 없어서 리스트가 빈 경우 종료
     print("크롤링할 데이터가 없습니다. 크롤링을 종료합니다.")
     break
 
   for item in items: # 채용공고 리스트를 돌면서 필요한 태그의 텍스트 추출
     # 회사 이름
-    company_tag = item.select(".corp_name a") # a 태그 추출
+    company_tag = item.select_one(".corp_name a") # a 태그 추출
     company = company_tag.text.strip() if company_tag else "" # 3항 연산자로 태그 내부의 텍스트를 꺼내고 공백 제거
 
     # 카테고리
@@ -77,8 +62,31 @@ while True: # 페이지 당 100개씩 29 페이지까지 있음
         "category" : c,
         "date" : date   
       })
-    
-    page += 1 # 다음 페이지
+  # 다음 페이지로 이동
+  try:
+      # 현재 페이지 span을 읽고 다음 페이지 계산
+      current_page_span = soup.select_one("span.page")
+      current_page_num = int(current_page_span.text.strip())
+      next_page_num = current_page_num + 1
+
+      # 다음 번호 a 태그 클릭
+      next_a = driver.find_elements(By.CSS_SELECTOR, f'a.page[page="{next_page_num}"]')
+      if next_a:
+        next_a[0].click()
+      else:
+        # 다음 페이지의 a 태그가 없다면 '다음'버튼인 btnNext 클릭 (10배수 페이지 넘어갈때)
+        btn_next = driver.find_elements(By.CSS_SELECTOR, "a.btnNext")
+        if btn_next:
+          btn_next[0].click()
+        else:
+          print("다음 페이지 없음 -> 크롤링 종료")
+          break
+      time.sleep(2)
+      page += 1
+
+  except Exception as e:
+      print("페이지 이동 중 오류 : ", e)
+      break
 
 # CSV 저장
 csv_file = '/Users/parkjuyong/Desktop/4-1/CareerRoute/assets/saramin_backend.csv'
@@ -89,3 +97,4 @@ with open(csv_file, "w", newline="", encoding="utf-8-sig") as f:
     writer.writerows(backendResult)
 
 print(f"\n총 {len(backendResult)}개의 레코드 저장됨.")
+driver.quit()

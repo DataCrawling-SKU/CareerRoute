@@ -7,7 +7,7 @@ from selenium.webdriver.chrome.options import Options
 import csv
 import time
 
-backendResult = [] # 데이터 행 저장
+result = [] # 데이터 행 저장
 
 # 셀레니움 옵션
 options = Options()
@@ -17,7 +17,7 @@ options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 # 첫 페이지 열기
-base_url = "https://www.saramin.co.kr/zf_user/search/recruit?search_area=main&search_done=y&search_optional_item=n&searchType=search&searchword=백엔드"
+base_url = "https://www.saramin.co.kr/zf_user/search/recruit?search_area=main&search_done=y&search_optional_item=n&searchType=search&searchword=클라우드/DevOps"
 driver.get(base_url)
 time.sleep(2) # 2초 sleep
 
@@ -55,7 +55,7 @@ while True:
 
     # 시계열 형태로 csv에 카테고리 당 한 행으로 저장
     for category in categories:
-      backendResult.append({
+      result.append({
         "company" : company,
         "category" : category,
         "date" : date   
@@ -88,12 +88,12 @@ while True:
       break
 
 # CSV 저장
-csv_file = '/Users/parkjuyong/Desktop/4-1/CareerRoute/assets/saramin/saramin_backend.csv'
+csv_file = '/Users/parkjuyong/Desktop/4-1/CareerRoute/assets/saramin/cloud-devops.csv'
 
 with open(csv_file, "w", newline="", encoding="utf-8-sig") as f:
     writer = csv.DictWriter(f, fieldnames=["company", "category", "date"])
     writer.writeheader()
-    writer.writerows(backendResult)
+    writer.writerows(result)
 
-print(f"\n총 {len(backendResult)}개의 레코드 저장됨.")
+print(f"\n총 {len(result)}개의 레코드 저장됨.")
 driver.quit()

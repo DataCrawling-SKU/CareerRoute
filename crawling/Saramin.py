@@ -19,11 +19,11 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 # 첫 페이지 열기
 base_url = "https://www.saramin.co.kr/zf_user/search/recruit?search_area=main&search_done=y&search_optional_item=n&searchType=search&searchword=백엔드"
 driver.get(base_url)
-time.sleep(2)
+time.sleep(2) # 2초 sleep
 
 page = 1 # 1페이지부터 크롤링
 
-while True: # 페이지 당 100개씩 29 페이지까지 있음
+while True: 
   print(f"{page} 페이지 접속 중")
 
   soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -38,7 +38,7 @@ while True: # 페이지 당 100개씩 29 페이지까지 있음
   for item in items: # 채용공고 리스트를 돌면서 필요한 태그의 텍스트 추출
     # 회사 이름
     company_tag = item.select_one(".corp_name a") # a 태그 추출
-    company = company_tag.text.strip() if company_tag else "" # 3항 연산자로 태그 내부의 텍스트를 꺼내고 공백 제거
+    company = company_tag.text.strip() if company_tag else "" # 태그 내부의 텍스트를 꺼내고 공백 제거
 
     # 카테고리
     category_tag = item.select(".job_sector a") # 리스트
@@ -60,6 +60,7 @@ while True: # 페이지 당 100개씩 29 페이지까지 있음
         "category" : category,
         "date" : date   
       })
+
   # 다음 페이지로 이동
   try:
       # 현재 페이지 span을 읽고 다음 페이지 계산
@@ -80,14 +81,14 @@ while True: # 페이지 당 100개씩 29 페이지까지 있음
           print("다음 페이지 없음 -> 크롤링 종료")
           break
       time.sleep(2)
-      page += 1
+      page += 1 # 로그용
 
   except Exception as e:
       print("페이지 이동 중 오류 : ", e)
       break
 
 # CSV 저장
-csv_file = '/Users/parkjuyong/Desktop/4-1/CareerRoute/assets/saramin_backend.csv'
+csv_file = '/Users/parkjuyong/Desktop/4-1/CareerRoute/assets/saramin/saramin_backend.csv'
 
 with open(csv_file, "w", newline="", encoding="utf-8-sig") as f:
     writer = csv.DictWriter(f, fieldnames=["company", "category", "date"])

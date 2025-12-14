@@ -14,7 +14,7 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 
 # tiobe의 해당 언어의 차트 페이지
 print("웹 브라우저 접속 중")
-driver.get("https://www.tiobe.com/tiobe-index/python/")
+driver.get("https://www.tiobe.com/tiobe-index/r/")
 print("웹 브라우저 접속 성공")
 
 WebDriverWait(driver, 10).until( # 페이지는 렌더링 되어도 차트는 비동기로 렌더링 되기 때문에 차트가 렌더링 되기까지 10초 대기
@@ -44,6 +44,6 @@ df = pd.DataFrame(data)
 df["date"] = pd.to_datetime(df["timestamp"], unit="ms") # 수집한 timestamp의 값을 dataTime 객체로 변환(초단위까지 필요 없음)
 df = df[["date","percent"]]
 
-df.to_csv('/Users/parkjuyong/Desktop/4-1/CareerRoute/assets/tiobe/python.csv', index=False)
+df.to_csv('/Users/parkjuyong/Desktop/4-1/CareerRoute/assets/tiobe/r.csv', index=False)
 
 print("완료")

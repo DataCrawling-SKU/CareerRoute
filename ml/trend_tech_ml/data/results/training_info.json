@@ -1,0 +1,26 @@
+{
+  "sequence_length": 12,
+  "num_features": 10,
+  "feature_names": [
+    "python",
+    "java",
+    "cpp",
+    "csharp",
+    "c",
+    "javascript",
+    "sql",
+    "r",
+    "visual_basic",
+    "perl"
+  ],
+  "hidden_size": 128,
+  "num_layers": 3,
+  "dropout": 0.2,
+  "learning_rate": 0.001,
+  "batch_size": 8,
+  "epochs_trained": 31,
+  "test_mse": 2.7809085845947266,
+  "test_mae": 0.7549222707748413,
+  "test_mape": 14.03475570678711,
+  "best_val_loss": 0.003470950693424259
+}

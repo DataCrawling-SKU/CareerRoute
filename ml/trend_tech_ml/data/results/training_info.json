@@ -1,5 +1,5 @@
 {
-  "sequence_length": 12,
+  "sequence_length": 36,
   "num_features": 10,
   "feature_names": [
     "python",
@@ -17,10 +17,10 @@
   "num_layers": 3,
   "dropout": 0.2,
   "learning_rate": 0.001,
-  "batch_size": 8,
-  "epochs_trained": 31,
-  "test_mse": 2.7809085845947266,
-  "test_mae": 0.7549222707748413,
-  "test_mape": 14.03475570678711,
-  "best_val_loss": 0.003470950693424259
+  "batch_size": 64,
+  "epochs_trained": 200,
+  "test_mse": 3.050450325012207,
+  "test_mae": 0.7664638161659241,
+  "test_mape": 14.854021072387695,
+  "best_val_loss": 0.0015277870115824044
 }

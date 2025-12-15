@@ -8,12 +8,10 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import json
 
-from model import LSTMModel, BidirectionalLSTMModel, AttentionLSTMModel
+from model import BidirectionalLSTMModel
 
 
 class TiobeDataset(Dataset):
-    """PyTorch Dataset for TIOBE time series data"""
-
     def __init__(self, X, y):
         self.X = torch.FloatTensor(X)
         self.y = torch.FloatTensor(y)
@@ -65,7 +63,6 @@ def split_data(X, y, train_ratio=0.8, val_ratio=0.1):
 
 
 def train_epoch(model, dataloader, criterion, optimizer, device):
-    """Train for one epoch"""
     model.train()
     total_loss = 0
     total_mae = 0
@@ -74,11 +71,11 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
 
-        # Forward pass
+        # 순전파
         y_pred = model(X_batch)
         loss = criterion(y_pred, y_batch)
 
-        # Backward pass
+        # 역전파로 가중치 파라미터 조정
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -213,8 +210,8 @@ def main():
     print("=" * 60)
 
     # Configuration
-    SEQUENCE_LENGTH = 12
-    BATCH_SIZE = 8
+    SEQUENCE_LENGTH = 36
+    BATCH_SIZE = 64
     HIDDEN_SIZE = 128
     NUM_LAYERS = 3
     DROPOUT = 0.2

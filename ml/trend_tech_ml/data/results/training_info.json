@@ -18,9 +18,9 @@
   "dropout": 0.2,
   "learning_rate": 0.001,
   "batch_size": 64,
-  "epochs_trained": 200,
-  "test_mse": 3.050450325012207,
-  "test_mae": 0.7664638161659241,
-  "test_mape": 14.854021072387695,
-  "best_val_loss": 0.0015277870115824044
+  "epochs_trained": 48,
+  "test_mse": 6.2096405029296875,
+  "test_mae": 1.5062453746795654,
+  "test_mape": 18.97392463684082,
+  "best_val_loss": 0.03402639552950859
 }

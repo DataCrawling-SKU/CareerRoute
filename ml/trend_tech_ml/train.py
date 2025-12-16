@@ -13,6 +13,7 @@ from model import BidirectionalLSTMModel
 
 class TiobeDataset(Dataset):
     def __init__(self, X, y):
+        # 데이터를 텐서로 변환
         self.X = torch.FloatTensor(X)
         self.y = torch.FloatTensor(y)
 
@@ -24,17 +25,7 @@ class TiobeDataset(Dataset):
 
 
 def create_sequences(data, seq_length=12):
-    """
-    Create sequences for LSTM training
-
-    Args:
-        data: numpy array (n_samples, n_features)
-        seq_length: number of time steps to look back
-
-    Returns:
-        X: (n_samples - seq_length, seq_length, n_features)
-        y: (n_samples - seq_length, n_features)
-    """
+    # 시계열 데이터를 모델의 입력 형태에 맞게 변환
     X, y = [], []
 
     for i in range(len(data) - seq_length):
@@ -44,8 +35,8 @@ def create_sequences(data, seq_length=12):
     return np.array(X), np.array(y)
 
 
+# 학습데이터 : 0.9 / 검증 데이터 : 0.1 / 테스트 데이터 : 0.1
 def split_data(X, y, train_ratio=0.8, val_ratio=0.1):
-    """Split data into train, validation, and test sets"""
     n_samples = len(X)
     train_size = int(n_samples * train_ratio)
     val_size = int(n_samples * val_ratio)
@@ -63,6 +54,7 @@ def split_data(X, y, train_ratio=0.8, val_ratio=0.1):
 
 
 def train_epoch(model, dataloader, criterion, optimizer, device):
+    # 학습코드 (1에폭 마다 수행)
     model.train()
     total_loss = 0
     total_mae = 0
@@ -81,18 +73,17 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         optimizer.step()
 
         # Metrics
-        total_loss += loss.item()
-        total_mae += torch.mean(torch.abs(y_pred - y_batch)).item()
+        total_loss += loss.item() # 값만 추출하여 메모리 효율 보장
+        total_mae += torch.mean(torch.abs(y_pred - y_batch)).item() # 평균 절대 오차
 
     avg_loss = total_loss / len(dataloader)
     avg_mae = total_mae / len(dataloader)
 
     return avg_loss, avg_mae
 
-
+# 검증데이터로 모델 성능 평가
 def validate_epoch(model, dataloader, criterion, device):
-    """Validate for one epoch"""
-    model.eval()
+    model.eval() # 평가 모드
     total_loss = 0
     total_mae = 0
 
@@ -104,7 +95,7 @@ def validate_epoch(model, dataloader, criterion, device):
             y_pred = model(X_batch)
             loss = criterion(y_pred, y_batch)
 
-            total_loss += loss.item()
+            total_loss += loss.item() 
             total_mae += torch.mean(torch.abs(y_pred - y_batch)).item()
 
     avg_loss = total_loss / len(dataloader)
@@ -112,12 +103,11 @@ def validate_epoch(model, dataloader, criterion, device):
 
     return avg_loss, avg_mae
 
-
+# 학습 과정 시각화
 def plot_training_history(history, save_path):
-    """Plot training history"""
     fig, axes = plt.subplots(1, 2, figsize=(15, 5))
 
-    # Loss
+    # Loss 그래프
     axes[0].plot(history['train_loss'], label='Train Loss', linewidth=2)
     axes[0].plot(history['val_loss'], label='Val Loss', linewidth=2)
     axes[0].set_title('Model Loss', fontsize=14, fontweight='bold')
@@ -126,7 +116,7 @@ def plot_training_history(history, save_path):
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
 
-    # MAE
+    # MAE 그래프
     axes[1].plot(history['train_mae'], label='Train MAE', linewidth=2)
     axes[1].plot(history['val_mae'], label='Val MAE', linewidth=2)
     axes[1].set_title('Mean Absolute Error', fontsize=14, fontweight='bold')
@@ -140,9 +130,8 @@ def plot_training_history(history, save_path):
     print(f"Training history saved to {save_path}")
     plt.close()
 
-
+# 테스트 데이터로 모델 평가
 def evaluate_model(model, test_loader, scaler, feature_names, device, save_path):
-    """Evaluate model and plot predictions"""
     model.eval()
 
     all_preds = []
@@ -159,17 +148,16 @@ def evaluate_model(model, test_loader, scaler, feature_names, device, save_path)
     y_pred = np.concatenate(all_preds, axis=0)
     y_test = np.concatenate(all_targets, axis=0)
 
-    # Inverse transform to original scale
+    # 정규화 이전으로 변환 (알기 쉽게)
     y_pred_original = scaler.inverse_transform(y_pred)
     y_test_original = scaler.inverse_transform(y_test)
 
-    # Calculate metrics
-    mse = np.mean((y_test_original - y_pred_original) ** 2)
-    mae = np.mean(np.abs(y_test_original - y_pred_original))
-    mape = np.mean(np.abs((y_test_original - y_pred_original) / (y_test_original + 1e-8))) * 100
+    mse = np.mean((y_test_original - y_pred_original) ** 2) # 평균 제곱 오차
+    mae = np.mean(np.abs(y_test_original - y_pred_original)) # 평균 오차
+    mape = np.mean(np.abs((y_test_original - y_pred_original) / (y_test_original + 1e-8))) * 100 # 퍼센트로 오차 표현
 
     print("\n" + "=" * 60)
-    print("TEST SET EVALUATION (Original Scale)")
+    print("Test set evaluation")
     print("=" * 60)
     print(f"MSE:  {mse:.4f}")
     print(f"MAE:  {mae:.4f}")
@@ -209,17 +197,16 @@ def main():
     print("TIOBE LSTM MODEL TRAINING (PyTorch)")
     print("=" * 60)
 
-    # Configuration
+    # 하이퍼 파라미터
     SEQUENCE_LENGTH = 36
     BATCH_SIZE = 64
     HIDDEN_SIZE = 128
     NUM_LAYERS = 3
     DROPOUT = 0.2
-    LEARNING_RATE = 0.001
+    LEARNING_RATE = 0.001 # 아담이 알아서 자동으로 조장해줄것임
     NUM_EPOCHS = 200
-    PATIENCE = 30
+    PATIENCE = 30 
 
-    # Paths
     data_dir = Path("/Users/parkjuyong/Desktop/4-1/CareerRoute/ml/trend_tech_ml/data")
     scaled_data_path = data_dir / "scaled_tiobe_data.csv"
     scaler_path = data_dir / "scaler.pkl"
@@ -227,32 +214,32 @@ def main():
     output_dir = data_dir / "results"
     output_dir.mkdir(exist_ok=True)
 
-    # Device
+    # GPU 사용시
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"\nUsing device: {device}")
 
-    # Load data
-    print("\n1. Loading data...")
+    # 데이터 로드
+    print("\n1. Loading data")
     df = pd.read_csv(scaled_data_path)
     dates = df['date'].values
     data = df.iloc[:, 1:].values
-    feature_names = df.columns[1:].tolist()
+    feature_names = df.columns[1:].tolist() # 첫번째 열이 특징(언어들)
 
     print(f"   Data shape: {data.shape}")
     print(f"   Features: {feature_names}")
 
-    # Load scaler
+    # 정규화 데이터 로드 
     with open(scaler_path, 'rb') as f:
         scaler = pickle.load(f)
 
     # Create sequences
-    print("\n2. Creating sequences...")
+    print("\n2. Creating sequences")
     X, y = create_sequences(data, seq_length=SEQUENCE_LENGTH)
     print(f"   X shape: {X.shape}")
     print(f"   y shape: {y.shape}")
 
-    # Split data
-    print("\n3. Splitting data...")
+    # 데이터 분할
+    print("\n3. Splitting data")
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
     print(f"   Train: {X_train.shape[0]} samples")
     print(f"   Val:   {X_val.shape[0]} samples")
@@ -267,11 +254,11 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-    # Build model
+    # 모델 구축
     print("\n4. Building model...")
     num_features = data.shape[1]
 
-    # Choose model (change here to try different models)
+    # 양방향 LSTM 모델 
     model = BidirectionalLSTMModel(
         num_features=num_features,
         hidden_size=HIDDEN_SIZE,
@@ -282,15 +269,15 @@ def main():
     print(f"   Model: BidirectionalLSTMModel")
     print(f"   Parameters: {sum(p.numel() for p in model.parameters()):,}")
 
-    # Loss and optimizer
+    # 손실함수 및 최적화 함수
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE) # 아담으로 학습률 자동조정
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='min', factor=0.5, patience=10
     )
 
-    # Training
-    print("\n5. Training model...")
+    # 학습 시작
+    print("\n5. Training model")
     print("=" * 60)
 
     history = {
@@ -320,7 +307,7 @@ def main():
                   f"Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, "
                   f"Train MAE: {train_mae:.4f}, Val MAE: {val_mae:.4f}")
 
-        # Save best model
+        # 최적화 모델 저장
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             patience_counter = 0
@@ -329,21 +316,21 @@ def main():
         else:
             patience_counter += 1
 
-        # Early stopping
+        # 강제종료
         if patience_counter >= PATIENCE:
             print(f"\nEarly stopping at epoch {epoch+1}")
             break
 
     print("\n" + "=" * 60)
-    print("Training completed!")
+    print("Training completed")
     print("=" * 60)
 
-    # Plot training history
-    print("\n6. Plotting training history...")
+    # 학습 과정 시각화
+    print("\n6. Plotting training history")
     plot_training_history(history, save_path=str(output_dir / "training_history.png"))
 
-    # Load best model and evaluate
-    print("\n7. Evaluating best model...")
+    # 최적 모델 로드 및 평가
+    print("\n7. Evaluating best model")
     model.load_state_dict(torch.load(best_model_path))
 
     mse, mae, mape = evaluate_model(
@@ -351,7 +338,7 @@ def main():
         save_path=str(output_dir / "predictions.png")
     )
 
-    # Save training info
+    # 학습 정보 저장
     info = {
         'sequence_length': SEQUENCE_LENGTH,
         'num_features': num_features,
@@ -374,7 +361,7 @@ def main():
     print(f"\nTraining info saved to {output_dir / 'training_info.json'}")
 
     print("\n" + "=" * 60)
-    print("ALL DONE!")
+    print("ALL DONE")
     print("=" * 60)
     print(f"Best model: {best_model_path}")
     print(f"Results: {output_dir}")

@@ -87,7 +87,7 @@ def main():
     print(f"    데이터 로드 완료: 최신 날짜 = {latest_date}")
     print(f"    입력 데이터: 최근 36개월 ({df.iloc[-36, 0]} ~ {latest_date})")
 
-    # 3. 다음 달 예측
+    # 다음 달 예측
     print("\n다음 달 예측 중...")
     next_month_pred = predict_next_month(model, scaler, latest_36_months)
 

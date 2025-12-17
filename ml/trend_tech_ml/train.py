@@ -198,8 +198,8 @@ def main():
     print("=" * 60)
 
     # 하이퍼 파라미터
-    SEQUENCE_LENGTH = 36
-    BATCH_SIZE = 64
+    SEQUENCE_LENGTH = 36  
+    BATCH_SIZE = 128
     HIDDEN_SIZE = 128
     NUM_LAYERS = 3
     DROPOUT = 0.2
@@ -250,9 +250,9 @@ def main():
     val_dataset = TiobeDataset(X_val, y_val)
     test_dataset = TiobeDataset(X_test, y_test)
 
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=False)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, drop_last=False)
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, drop_last=False)
 
     # 모델 구축
     print("\n4. Building model...")

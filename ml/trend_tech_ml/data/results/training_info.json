@@ -17,10 +17,10 @@
   "num_layers": 3,
   "dropout": 0.2,
   "learning_rate": 0.001,
-  "batch_size": 64,
-  "epochs_trained": 48,
-  "test_mse": 6.2096405029296875,
-  "test_mae": 1.5062453746795654,
-  "test_mape": 18.97392463684082,
-  "best_val_loss": 0.03402639552950859
+  "batch_size": 128,
+  "epochs_trained": 53,
+  "test_mse": 3.403038263320923,
+  "test_mae": 0.9437496662139893,
+  "test_mape": 14.200739860534668,
+  "best_val_loss": 0.011182039976119995
 }
